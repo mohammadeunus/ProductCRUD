@@ -3,6 +3,19 @@
 @{
     ViewData["Title"] = "Add";
 }
+@functions {
+    public List<SelectListItem> GetAvailabilityOptions()
+    {
+        var options = new List<SelectListItem>
+        {
+            new SelectListItem { Text = "Yes", Value = "true" },
+            new SelectListItem { Text = "No", Value = "false" }
+        };
+
+        return options;
+    }
+}
+
 
 <h1>Add Product</h1>
 
@@ -29,10 +42,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="isAvailable" class="control-label"></label>
-                <input asp-for="isAvailable" class="form-control" />
+                <select asp-for="isAvailable" asp-items="@GetAvailabilityOptions()" class="form-control"></select>
                 <span asp-validation-for="isAvailable" class="text-danger"></span>
             </div>
 
+
+            <hr />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

@@ -1,7 +1,13 @@
+using ProductCRUD.CLIENT.Interfaces;
+using ProductCRUD.CLIENT.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// IoC container 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 

@@ -1,67 +1,61 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using ProductCRUD.CLIENT.DTOs;
-using ProductCRUD.CLIENT.Models;
+using ProductCRUD.CLIENT.Interfaces;
+using ProductCRUD.CLIENT.Repositories; 
 
-namespace ProductCRUD.CLIENT.Controllers;
-
-public class HomeController : Controller
+namespace ProductCRUD.CLIENT.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-    HttpClient _client = new HttpClient();
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
+        private readonly ILogger<HomeController> _logger;
+        private readonly IProductRepository _productRepository;
 
-
-    [HttpGet]
-    public async Task<IActionResult> Index()
-    {
-        try
+        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository)
         {
-            List<ProductModel> products = new List<ProductModel>();
-
-            _client.BaseAddress = new Uri("https://stg-zero.propertyproplus.com.au/api/services/app/ProductSync");
-            HttpResponseMessage response = await _client.GetAsync("/GetAllproduct");
-
-            //convert response from api into list of productModel
-            if (response.IsSuccessStatusCode) products = JsonConvert.DeserializeObject<List<ProductModel>>(await response.Content.ReadAsStringAsync());
-
-            return View(products);
-
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
-        catch (Exception ex)
-        {
-            _logger.LogError("HomeController > Index Error: " + ex.ToString());
-            return View(null);
-        }
-    }
 
-    [HttpGet]
-    public IActionResult AddProduct()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> AddProduct(AddProductDTO product)
-    {
-        try
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            _client.BaseAddress = new Uri("https://stg-zero.propertyproplus.com.au/api/services/app/ProductSync");
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/CreateOrEdit", product);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return RedirectToAction("Index");
+                var products = await _productRepository.GetAllProductsAsync();
+                return View(products);
             }
-            return View(product);
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeController > Index Error: " + ex.ToString());
+                return View(null);
+            }
         }
-        catch (Exception ex)
+
+        [HttpGet]
+        public IActionResult AddProduct()
         {
-            _logger.LogError("HomeController > AddProduct Error: " + ex.ToString());
-            return View(null);
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddProduct(AddProductDTO product)
+        {
+            try
+            {
+                var isSuccess = await _productRepository.AddProductAsync(product);
+
+                if (isSuccess)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("HomeController > AddProduct Error: " + ex.ToString());
+                return View(null);
+            }
         }
     }
 }

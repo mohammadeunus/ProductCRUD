@@ -42,7 +42,6 @@ public class AccountController : Controller
 
             // Parse the JSON response to object
             var responseContentJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            var isCookieSaved = IsCookieCreated(responseContentJson, user.userNameOrEmailAddress);
 
             // Check if the response is successful (status code 200)
             if (!response.IsSuccessStatusCode || (int)response.StatusCode >= 400)
@@ -54,6 +53,8 @@ public class AccountController : Controller
                 return View();
             }
 
+            //create cookie
+            var isCookieSaved = IsCookieCreated(responseContentJson, user.userNameOrEmailAddress);
 
             return RedirectToAction("Index", "Home");
 
@@ -128,5 +129,9 @@ public class AccountController : Controller
     { 
         string cookieValue = Request.Cookies[key];
         return cookieValue;
+    }
+    public bool IsUserLoggedIn(string key)
+    {
+        return Request.Cookies["userName"] != null;
     }
 }

@@ -4,42 +4,43 @@
     ViewData["Title"] = "Home Page";
 }
 
-
 <h1>Index</h1>
- 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.isAvailable)
-            </th> 
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model == null)
-        {
-            <p> No product found. </p>
-        }
 
-        @foreach (var item in Model)
-        {
+@if (Model == null || !Model.Any())
+{
+    <p>No products found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.isAvailable)
-                </td> 
+                <th>
+                    @Html.DisplayNameFor(model => model.First().name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().isAvailable)
+                </th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.isAvailable)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

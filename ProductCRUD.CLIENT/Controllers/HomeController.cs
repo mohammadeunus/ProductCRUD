@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Mvc;
 using ProductCRUD.CLIENT.DTOs;
 using ProductCRUD.CLIENT.Interfaces;
 using ProductCRUD.CLIENT.Repositories; 
@@ -21,7 +22,10 @@ namespace ProductCRUD.CLIENT.Controllers
         {
             try
             {
-                var products = await _productRepository.GetAllProductsAsync();
+                // get token
+                var token = Request.Cookies[Request.Cookies["userName"]];
+
+                var products = await _productRepository.GetAllProductsAsync(token);
                 return View(products);
             }
             catch (Exception ex)
@@ -42,7 +46,11 @@ namespace ProductCRUD.CLIENT.Controllers
         {
             try
             {
-                var isSuccess = await _productRepository.AddProductAsync(product);
+
+                // get token
+                var token = Request.Cookies[Request.Cookies["userName"]];
+
+                var isSuccess = await _productRepository.AddProductAsync(product, token);
 
                 if (isSuccess)
                 {

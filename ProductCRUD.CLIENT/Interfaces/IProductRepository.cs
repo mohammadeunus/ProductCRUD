@@ -5,6 +5,6 @@ namespace ProductCRUD.CLIENT.Interfaces;
  
 public interface IProductRepository
 {
-    Task<List<ProductModel>> GetAllProductsAsync();
-    Task<bool> AddProductAsync(AddProductDTO product);
+    Task<List<ProductModel>> GetAllProductsAsync(string token);
+    Task<bool> AddProductAsync(AddProductDTO product, string token);
 }

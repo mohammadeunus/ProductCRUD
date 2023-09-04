@@ -17,10 +17,14 @@ public class ProductRepository : IProductRepository
         _client.BaseAddress = new Uri("https://stg-zero.propertyproplus.com.au");
     }
 
-    public async Task<List<ProductModel>> GetAllProductsAsync()
+    public async Task<List<ProductModel>> GetAllProductsAsync(string token)
     {
         try
         {
+            // Set the the header of GetAllproduct api
+            var headerToken = "Bearer "+ token;
+            _client.DefaultRequestHeaders.Add("Authorization", headerToken);
+
             HttpResponseMessage response = await _client.GetAsync("/api/services/app/ProductSync/GetAllproduct");
 
             if (response.IsSuccessStatusCode)
@@ -37,10 +41,14 @@ public class ProductRepository : IProductRepository
         }
     }
 
-    public async Task<bool> AddProductAsync(AddProductDTO product)
+    public async Task<bool> AddProductAsync(AddProductDTO product, string token)
     {
         try
         {
+            // Set the the header of GetAllproduct api
+            var headerToken = "Bearer " + token;
+            _client.DefaultRequestHeaders.Add("Authorization", headerToken);
+
             HttpResponseMessage response = await _client.PostAsJsonAsync("/api/services/app/ProductSync/CreateOrEdit", product);
 
             if (response.IsSuccessStatusCode)
@@ -56,4 +64,5 @@ public class ProductRepository : IProductRepository
             return false;
         }
     }
+
 }

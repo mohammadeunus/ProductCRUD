@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ProductCRUD.CLIENT.Models;
 
 namespace ProductCRUD.CLIENT.Controllers;
@@ -35,16 +36,27 @@ public class AccountController : Controller
             // Serialize the user object to JSON and send it as the request body
             HttpResponseMessage response = await _client.PostAsJsonAsync("/api/TokenAuth/Authenticate", user);
 
-            // Check if the response is successful (status code 200)
-            if (!response.IsSuccessStatusCode) return View(response);
-            
+
             // Read the response content as a string
             string responseContent = await response.Content.ReadAsStringAsync();
 
-            // Set the response content in ViewBag
-            ViewBag.ResponseContent = "hi" + responseContent;
+            // Parse the JSON response to extract error details
+            var responseContentJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
 
-            return View(user);
+            // Check if the response is successful (status code 200)
+            if (!response.IsSuccessStatusCode || (int)response.StatusCode >= 400)
+            {  
+                string errorDetails = responseContentJson?.error?.details;
+                 
+                ViewBag.ErrorDetails = errorDetails;
+
+                return View();
+            }
+
+            // Set the response content in ViewBag
+            ViewBag.ResponseContent = responseContent;
+
+            return RedirectToAction("Index", "Home");
 
         }
         catch (Exception ex)

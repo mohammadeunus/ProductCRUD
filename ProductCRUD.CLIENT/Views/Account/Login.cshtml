@@ -23,9 +23,11 @@
     </div>
 </div>
 
-
-<div class="alert alert-info">
-    <strong>API Response:</strong><br />
-    <pre>@Html.Raw(ViewBag.ResponseContent)</pre>
-</div>
-
+@if (ViewBag.ErrorDetails != null)
+{
+    <hr />
+    <div class="alert alert-info">
+        <strong>Error Response:</strong><br />
+        <pre>@Html.Raw(ViewBag.ErrorDetails)</pre>
+    </div>
+}

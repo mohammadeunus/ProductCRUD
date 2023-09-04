@@ -12,8 +12,8 @@ namespace ProductCRUD.CLIENT.Controllers
 
         public HomeController(ILogger<HomeController> logger, IProductRepository productRepository)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _logger = logger;
+            _productRepository = productRepository;
         }
 
         [HttpGet]

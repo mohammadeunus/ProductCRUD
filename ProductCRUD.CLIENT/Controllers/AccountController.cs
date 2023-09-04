@@ -21,7 +21,7 @@ public class AccountController : Controller
     {
         return View();
     }
-      
+
     [HttpPost]
     public async Task<IActionResult> Login(UserModel user)
     {
@@ -40,21 +40,20 @@ public class AccountController : Controller
             // Read the response content as a string
             string responseContent = await response.Content.ReadAsStringAsync();
 
-            // Parse the JSON response to extract error details
+            // Parse the JSON response to object
             var responseContentJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            var isCookieSaved = IsCookieCreated(responseContentJson, user.userNameOrEmailAddress);
 
             // Check if the response is successful (status code 200)
             if (!response.IsSuccessStatusCode || (int)response.StatusCode >= 400)
-            {  
+            {
                 string errorDetails = responseContentJson?.error?.details;
-                 
+
                 ViewBag.ErrorDetails = errorDetails;
 
                 return View();
             }
 
-            // Set the response content in ViewBag
-            ViewBag.ResponseContent = responseContent;
 
             return RedirectToAction("Index", "Home");
 
@@ -64,5 +63,70 @@ public class AccountController : Controller
             _logger.LogError("AccountController > Login Error: " + ex.ToString());
             return View(null);
         }
+    }
+
+    public IActionResult LogOut()
+    {
+        try
+        {
+            var userNameOrEmailAddress = ReadCookie("userName");
+            if (userNameOrEmailAddress == null) return View("LogIn");
+            string accessToken = string.Empty;
+
+            // Store the expireInSeconds in a cookie
+            CookieOptions expireOptions = new CookieOptions()
+            {
+                Expires = DateTime.Now.AddSeconds(-10),
+            };
+
+            Response.Cookies.Append(userNameOrEmailAddress, accessToken, expireOptions);
+            Response.Cookies.Append("userName", accessToken, expireOptions);
+              
+            return View("LogIn");
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("AccountController > LogOut > Error: " + ex.ToString());
+            return View("LogIn");
+        }
+    }
+
+    public bool IsCookieCreated(object responseContentJson, string userNameOrEmailAddress)
+    {
+        try
+        {
+            if (responseContentJson == null) return false;
+
+            // Deserialize the JSON string to get the expireInSeconds and accessToken values
+            var jsonResponse = JsonConvert.DeserializeAnonymousType(responseContentJson.ToString(), new { result = new { accessToken = "", expireInSeconds = 0 } });
+            int expireInSeconds = jsonResponse.result.expireInSeconds;
+            string accessToken = jsonResponse.result.accessToken;
+
+            // Store the expireInSeconds in a cookie
+            CookieOptions expireOptions = new CookieOptions()
+            {
+                Expires = DateTime.Now.AddSeconds(expireInSeconds),
+            };
+
+            Response.Cookies.Append(userNameOrEmailAddress, accessToken, expireOptions);
+            Response.Cookies.Append("userName", userNameOrEmailAddress, expireOptions);
+
+            var res = ReadCookie(userNameOrEmailAddress);
+
+            return true;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("AccountController > IsCookieCreated > Error: " + ex.ToString());
+            return false;
+        }
+
+    }
+    public string ReadCookie(string key)
+    { 
+        string cookieValue = Request.Cookies[key];
+        return cookieValue;
     }
 }
